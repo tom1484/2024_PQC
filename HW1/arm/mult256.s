@@ -58,24 +58,15 @@
 
 ; Macro reserve_stack_pre
     .macro reserve_stack_pre, size
-    sub    sp, sp, #(48 + \size)
-    .cfi_def_cfa_offset (48 + \size)
-    stp    x29, x30, [sp, #(32 + \size)]             ; 16-byte Folded Spill
-    add    x29, sp, #(32 + \size)
-    .cfi_def_cfa w29, 16
-    .cfi_offset w30, -8
-    .cfi_offset w29, -16
-    mov    w8, #0
-    str    w8, [sp, #8]                        ; 4-byte Folded Spill
-    stur    wzr, [x29, #-4]
+    sub    sp, sp, #(32 + \size)
+    stp    x29, x30, [sp, #(16 + \size)]             ; 16-byte Folded Spill
     .endm
 ; End of Macro reserve_stack_pre
 
 ; Macro reserve_stack_post
     .macro reserve_stack_post, size
-    ldr    w0, [sp, #8]                        ; 4-byte Folded Reload
-    ldp    x29, x30, [sp, #(32 + \size)]             ; 16-byte Folded Reload
-    add    sp, sp, #(48 + \size)
+    ldp    x29, x30, [sp, #(16 + \size)]             ; 16-byte Folded Reload
+    add    sp, sp, #(32 + \size)
     .endm
 ; End of Macro reserve_stack_post
 
@@ -147,6 +138,10 @@ _mult256:
     .cfi_startproc
     reserve_stack_pre (8 * 12 + 32 * 8)
 
+    ; virtual zero
+    adrp x15, _zero@PAGE
+    add x15, x15, _zero@PAGEOFF
+
     ; initialize registers
     add x4, sp, #(32 * 0)
     add x5, sp, #(32 * 1)
@@ -157,9 +152,39 @@ _mult256:
     add x10, sp, #(32 * 6)
     add x11, sp, #(32 * 7)
 
-    ; virtual zero
-    adrp x15, _zero@PAGE
-    add x15, x15, _zero@PAGEOFF
+    ; zerofill
+    str xzr, [sp, #(8 * 0)]
+    str xzr, [sp, #(8 * 1)]
+    str xzr, [sp, #(8 * 2)]
+    str xzr, [sp, #(8 * 3)]
+    str xzr, [sp, #(8 * 4)]
+    str xzr, [sp, #(8 * 5)]
+    str xzr, [sp, #(8 * 6)]
+    str xzr, [sp, #(8 * 7)]
+    str xzr, [sp, #(8 * 8)]
+    str xzr, [sp, #(8 * 9)]
+    str xzr, [sp, #(8 * 10)]
+    str xzr, [sp, #(8 * 11)]
+    str xzr, [sp, #(8 * 12)]
+    str xzr, [sp, #(8 * 13)]
+    str xzr, [sp, #(8 * 14)]
+    str xzr, [sp, #(8 * 15)]
+    str xzr, [sp, #(8 * 16)]
+    str xzr, [sp, #(8 * 17)]
+    str xzr, [sp, #(8 * 18)]
+    str xzr, [sp, #(8 * 19)]
+    str xzr, [sp, #(8 * 20)]
+    str xzr, [sp, #(8 * 21)]
+    str xzr, [sp, #(8 * 22)]
+    str xzr, [sp, #(8 * 23)]
+    str xzr, [sp, #(8 * 24)]
+    str xzr, [sp, #(8 * 25)]
+    str xzr, [sp, #(8 * 26)]
+    str xzr, [sp, #(8 * 27)]
+    str xzr, [sp, #(8 * 28)]
+    str xzr, [sp, #(8 * 29)]
+    str xzr, [sp, #(8 * 30)]
+    str xzr, [sp, #(8 * 31)]
 
     ; calculate i00 = a0 * b0
     push_reg (32 * 8)
@@ -221,6 +246,9 @@ _mult256:
     cpw x11, #8, x6, #24
     cpw x11, #12, x6, #28
 
+    ; clear carry flag
+    adcs xzr, xzr, xzr
+
     ; calculate d = i11 + i011 + i101
     add256 x3, x7, x9    ; d = i11 + i011
     add256 x3, x3, x11   ; d += i101
@@ -232,10 +260,6 @@ _mult256:
     add256 x2, x2, x10   ; c += i100
     b.CC .+4
         add256 x3, x3, x15   ; d += 1 if carry
-
-    ; test
-    ; ldr x4, [x15, #0]
-    ; str x4, [x2]
 
     reserve_stack_post (8 * 12 + 32 * 8)
     ret
@@ -256,6 +280,24 @@ _mult128:
     add x9, sp, #(16 * 5)
     add x10, sp, #(16 * 6)
     add x11, sp, #(16 * 7)
+
+    ; zerofill
+    str xzr, [sp, #(8 * 0)]
+    str xzr, [sp, #(8 * 1)]
+    str xzr, [sp, #(8 * 2)]
+    str xzr, [sp, #(8 * 3)]
+    str xzr, [sp, #(8 * 4)]
+    str xzr, [sp, #(8 * 5)]
+    str xzr, [sp, #(8 * 6)]
+    str xzr, [sp, #(8 * 7)]
+    str xzr, [sp, #(8 * 8)]
+    str xzr, [sp, #(8 * 9)]
+    str xzr, [sp, #(8 * 10)]
+    str xzr, [sp, #(8 * 11)]
+    str xzr, [sp, #(8 * 12)]
+    str xzr, [sp, #(8 * 13)]
+    str xzr, [sp, #(8 * 14)]
+    str xzr, [sp, #(8 * 15)]
 
     ; calculate i00 = a0 * b0
     push_reg (16 * 8)
@@ -309,6 +351,9 @@ _mult128:
     cpw x11, #0, x6, #8
     cpw x11, #4, x6, #12
 
+    ; clear carry flag
+    adcs xzr, xzr, xzr
+
     ; calculate d = i11 + i011 + i101
     add128 x3, x7, x9    ; d = i11 + i011
     add128 x3, x3, x11   ; d += i101
@@ -344,6 +389,16 @@ _mult64:
     add x9, sp, #(8 * 5)
     add x10, sp, #(8 * 6)
     add x11, sp, #(8 * 7)
+
+    ; zerofill
+    str xzr, [sp, #(8 * 0)]
+    str xzr, [sp, #(8 * 1)]
+    str xzr, [sp, #(8 * 2)]
+    str xzr, [sp, #(8 * 3)]
+    str xzr, [sp, #(8 * 4)]
+    str xzr, [sp, #(8 * 5)]
+    str xzr, [sp, #(8 * 6)]
+    str xzr, [sp, #(8 * 7)]
 
     ; calculate i00 = a0 * b0
     push_reg (8 * 8)
@@ -392,6 +447,9 @@ _mult64:
 
     ; calculate i101 = i10 / H
     cpw x11, #0, x6, #4
+
+    ; clear carry flag
+    adcs xzr, xzr, xzr
 
     ; calculate d = i11 + i011 + i101
     add64 x3, x7, x9    ; d = i11 + i011

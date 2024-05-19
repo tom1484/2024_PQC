@@ -2,26 +2,43 @@
 
 #include "mult256.h"
 
-int32_t r0[8] = {0xFF000001, 0x000FF002, 0x00000003, 0x00000004,
-                 0x00000005, 0x00000006, 0x00000007, 0x00000008};
-int32_t r1[8] = {0xFF000002, 0x000FF003, 0x00000004, 0x00000005,
-                 0x00000006, 0x00000007, 0x00000008, 0x00000009};
-int32_t r2[8] = {0, 0, 0, 0, 0, 0, 0, 0};
-int32_t r3[8] = {0, 0, 0, 0, 0, 0, 0, 0};
-int a = 0;
+char input0[100] = "";
+char input1[100] = "";
+
+int r0[8] = {0};
+int r1[8] = {0};
+int r2[8] = {0};
+int r3[8] = {0};
+
+void print256(int *r) {
+  for (int i = 0; i < 8; i++) {
+    printf("%08X", r[7 - i]);
+  }
+  printf("\n");
+}
+
+int read_input() {
+  // Input hex strings
+  scanf("%s\n", input0);
+  scanf("%s\n", input1);
+
+  // Convert hex strings to int arrays
+  for (int i = 0; i < 8; i++) {
+    sscanf(input0 + 8 * (7 - i), "%8X", &r0[i]);
+    sscanf(input1 + 8 * (7 - i), "%8X", &r1[i]);
+  }
+
+  return 0;
+}
 
 int main() {
-  mult256(r0, r1, r2, r3);
+  while (!feof(stdin)) {
+    read_input();
+    mult256(r0, r1, r2, r3);
 
-  for (int i = 0; i < 8; i++) {
-    printf("r2[%d] = %08x\n", i, r2[i]);
+    print256(r3); // upper 256 bits
+    print256(r2); // lower 256 bits
   }
-  printf("\n");
-
-  for (int i = 0; i < 8; i++) {
-    printf("r3[%d] = %08x\n", i, r3[i]);
-  }
-  printf("\n");
 
   return 0;
 }
