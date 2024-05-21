@@ -1,6 +1,6 @@
 ```sh
 # Generate correct answer for comparison
-python test/generate_output.py test/input.txt > test/output.txt
+python test/generate_output.py 10 test/input.txt test/output.txt
 
 # Build and run (arm64 - MacOS)
 mkdir arm64/bin

@@ -1,15 +1,20 @@
 import sys
+from random import randint
 
-input_f = open(sys.argv[1], "r")
-input_lines = input_f.readlines()
+N = int(sys.argv[1])
+input_f = open(sys.argv[2], "w")
+output_f = open(sys.argv[3], "w")
 
-for i in range(0, len(input_lines), 2):
-    a = int(input_lines[i][:-1], 16)
-    b = int(input_lines[i + 1][:-1], 16)
+for i in range(N):
+    a = randint(0, 2**256 - 1)
+    b = randint(0, 2**256 - 1)
+
+    input_f.write("%064X\n" % a)
+    input_f.write("%064X\n" % b)
+
     c = a * b
-
     high = c >> 256
     low = c - (high << 256)
 
-    print("%064X" % high)
-    print("%064X" % low)
+    output_f.write("%064X\n" % high)
+    output_f.write("%064X\n" % low)
